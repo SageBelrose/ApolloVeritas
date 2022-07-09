@@ -1,0 +1,12 @@
+ApolloVeritas was created in 2022 as a fork from PyGCDS, a python reimplementation
+of Google Cloud Directory Sync.
+
+Here is an inevitably incomplete list of contributors we are grateful to. These are folks
+who have either written code, reported bugs, asked good questions, or otherwise helped:
+
+MAINTAINERS:
+    Sage Victoria Belrose <sage@belrose.dev>
+
+CONTRIBUTORS:
+    Cory Cantu <corycantu@springfield-schools.org>
+    Matt Bentlage <mbentlage@gibsonburgschools.org>
