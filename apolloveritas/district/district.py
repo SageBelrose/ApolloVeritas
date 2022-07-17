@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import List, Union, Dict
+from pathlib import Path
 import csv
 
 from apolloveritas.google import GoogleUser, GoogleGroup, GoogleService
@@ -16,20 +17,28 @@ class District:
 
     def __init__(self):
         self.name = 'School District'  # TODO: Load from conf
-        self.student_csv = self.load_csv()
+        self.student_csv = self.load_student_csv()
         self.ldap = LdapDirectory()
         self.google_service = GoogleService()
         self.schools: List[School] = self.get_all_schools()
         self.students: List[Student] = self.get_all_students()
         self.staff: List[Staff] = self.get_all_staff()
 
-    def load_student_csv(self) -> Dict:
+    def load_student_csv(self, csv_file_path: Path = Path('student_export.csv')) -> List[Dict]:
         """
         Reads the student information csv specified in configuration file into memory.
+        It expects to find a file called student_export.csv that contains the following columns:
+        "StudentID","FirstName","MiddleName","LastName","Grade","SchoolID","Enrolled","District Relationship"
+        Students not included in the student_export csv are will have their accounts disabled.
+        Disabled users have their groups removed to keep group membership clean.
         Returns:
             A dictionary of key:value pairs from the student information csv file.
         """
-        return {}
+        # TODO: build ingest/transfer mechanism for CSV
+        with open(csv_file_path, 'r', newline='') as csvfile:
+            reader = csv.DictReader(csvfile)
+            student_csv_values = [row for row in reader]
+        return student_csv_values
 
     def get_all_schools(self) -> List[School]:
         """
@@ -119,10 +128,18 @@ class Grade:
 
 
 class Student:
-
-    def __init__(self):
-        pass
-
+    def __init__(self, student_csv_dict):
+        self.student_id = student_csv_dict.get('StudentID')
+        self.first_name = student_csv_dict.get('FirstName')
+        self.middle_name = student_csv_dict.get('MiddleName')
+        self.last_name = student_csv_dict.get("LastName")
+        self.grade = student_csv_dict.get('Grade')
+        self.school_id = student_csv_dict.get('SchoolID')
+        self.enrolled: bool = True if student_csv_dict.get('Enrolled') else False
+        # District Relationship is a set of status codes used by some districts, such as those in OHIO, to indicate
+        # which students are a physical butt in a seat in their classrooms, versus students that live in one district
+        # but attend school somewhere else.
+        self.district_relationship = student_csv_dict.get('DistrictRelationship')
 
 class Staff:
 
